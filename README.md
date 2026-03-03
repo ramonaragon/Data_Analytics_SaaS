@@ -1,32 +1,38 @@
-# DataSocio SaaS Prompt Landing Page
+# Data Analytics Sénior - SaaS B2B
 
-Una interfaz premium diseñada para presentar y distribuir el **Prompt Maestro de Rol AI** para productos de Data Analytics y Business Intelligence.
+Plataforma SaaS de análisis de datos financieros automatizada mediante IA y OCR, diseñada para escalar desde scripts locales a una solución multi-empresa en la nube.
 
-## Características
-- **Diseño Ultra-Moderno**: Estética Dark Mode con orbes animados y glassmorphism.
-- **Interactividad**: Revelación de contenido al hacer scroll, contadores animados y micro-interacciones de mouse.
-- **Modularidad**: El prompt está dividido en 4 módulos lógicos para una implementación gradual.
-- **Copiado al Portapapeles**: Sistema UX fluido para copiar bloques individuales o el prompt maestro completo.
-- **Optimizado**: SEO integrado, accesibilidad y diseño responsive.
+## 🚀 Arquitectura
+- **Frontend**: Next.js 15 + Tailwind CSS + Recharts (Dashboard de elite).
+- **Backend**: Node.js + Express (API multi-tenant con aislamiento de datos).
+- **Base de Datos**: PostgreSQL (Esquema en `backend/schema.sql`).
+- **IA/OCR**: Pipeline preparado para integración con modelos locales (Mistral/Zephyr) y OCR (PaddleOCR).
 
-## Tecnologías
-- HTML5 Semántico
-- Vanilla CSS (Glassmorphism, Animations)
-- Vanilla JS (Intersection Observer, Clipboard API)
-- Google Fonts (Unbounded, Inter, DM Serif Display, DM Mono)
+## 🛠️ Cómo Iniciar
 
-## Uso Local
-1. Instala las dependencias:
-   ```bash
-   npm install
-   ```
-2. Inicia el servidor de desarrollo:
-   ```bash
-   npm run dev
-   ```
+### 1. Backend (API)
+```bash
+cd backend
+npm install
+npm start
+```
+*Corre en http://localhost:8000*
 
-## Estructura de Archivos
-- `index.html`: Estructura y contenido.
-- `style.css`: Sistema de diseño y animaciones.
-- `script.js`: Lógica de interactividad.
-- `package.json`: Configuración del entorno de desarrollo.
+### 2. Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+*Corre en http://localhost:3000*
+
+## 💎 Características Implementadas (Prompt Maestro)
+- [x] **Autenticación Multi-tenant**: Aislamiento total de datos por encabezados de Tenant.
+- [x] **Subida de Facturas**: Drag & drop integrado con procesamiento en background.
+- [x] **Extracción IA (Mock)**: Simulación de extracción de datos (Fecha, Proveedor, Importe).
+- [x] **Analytics Sénior**: Dashboard dinámico con KPIs en tiempo real.
+- [x] **Conector ERP**: Funcionalidad para sincronizar datos procesados con sistemas contables.
+- [x] **Planes de Precios**: Lógica de límites para planes Basic y Pro.
+
+## 🔒 Privacidad
+El sistema está diseñado para usar modelos LLM **locales/privados**, garantizando que los datos financieros nunca salgan del entorno controlado del cliente.

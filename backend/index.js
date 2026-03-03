@@ -29,66 +29,114 @@ if (!fs.existsSync('./data/')) {
     fs.mkdirSync('./data/');
 }
 
+// Mock In-Memory Database
+let invoices = [
+    { id: uuidv4(), tenant_id: 'ac93a157-9394-4b01-9a5e-c77619d3b19c', vendor_name: 'Amazon Web Services', invoice_date: '2026-03-02', total_amount: 450.00, currency: 'EUR', status: 'processed', synced: true },
+    { id: uuidv4(), tenant_id: 'ac93a157-9394-4b01-9a5e-c77619d3b19c', vendor_name: 'Google Workspace', invoice_date: '2026-03-01', total_amount: 89.50, currency: 'EUR', status: 'processed', synced: true },
+    { id: uuidv4(), tenant_id: 'ac93a157-9394-4b01-9a5e-c77619d3b19c', vendor_name: 'Apple Ireland', invoice_date: '2026-02-27', total_amount: 1299.00, currency: 'EUR', status: 'processed', synced: false },
+];
+
+let tenants = {
+    'ac93a157-9394-4b01-9a5e-c77619d3b19c': { name: 'Empresa Demo', plan: 'Pro' }
+};
+
 // --- Routes ---
 
 app.get('/', (req, res) => {
     res.json({ message: "Welcome to Data Analytics Sénior API (Node.js)", status: "online" });
 });
 
-// Mock Extraction Service
-const extractionService = {
-    extractFromText: async (text) => {
-        // Mock result
-        return {
-            fecha: "2026-03-01",
-            vendor_name: "Google Cloud",
-            concept: "Servicios de Infraestructura",
-            total_amount: 145.20,
-            currency: "EUR",
-            invoice_number: "INV-2026-001",
-            status: "processed"
-        };
+// Mock ERP Connector
+const erpConnector = {
+    syncInvoice: async (invoice) => {
+        console.log(`[ERP] Syncing invoice ${invoice.id} to SAP/Sage...`);
+        return true;
     }
 };
 
 app.post('/invoices/upload', upload.single('file'), (req, res) => {
     const tenant_id = req.headers['x-tenant-id'];
+    const tenant = tenants[tenant_id];
 
-    if (!tenant_id) {
-        return res.status(400).json({ error: "X-Tenant-ID header is required" });
+    if (!tenant_id || !tenant) {
+        return res.status(400).json({ error: "Invalid or missing X-Tenant-ID" });
+    }
+
+    // Pricing Plan check (B2B logic)
+    const activeInvoices = invoices.filter(i => i.tenant_id === tenant_id).length;
+    if (tenant.plan === 'Basic' && activeInvoices >= 50) {
+        return res.status(403).json({ error: "Límite del plan básico alcanzado. Sube a PRO para procesar más facturas." });
     }
 
     if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // In production, we'd start an async processing job here
-    const new_id = uuidv4();
-
-    res.json({
-        id: new_id,
+    const newInvoice = {
+        id: uuidv4(),
         tenant_id: tenant_id,
+        vendor_name: "Detectando...",
+        invoice_date: new Date().toISOString().split('T')[0],
+        total_amount: Math.floor(Math.random() * 500) + 50, // Simulated AI extraction
+        currency: "EUR",
         status: "processing",
-        message: "Invoice upload successful. Processing started.",
-        vendor_name: "Procesando AI..."
-    });
+        synced: false,
+        file_path: req.file.path
+    };
+
+    invoices.unshift(newInvoice);
+
+    // Simulate AI extraction finishing after 3 seconds
+    setTimeout(() => {
+        const idx = invoices.findIndex(i => i.id === newInvoice.id);
+        if (idx !== -1) {
+            invoices[idx].vendor_name = "Proveedor IA Detectado";
+            invoices[idx].status = "processed";
+        }
+    }, 3000);
+
+    res.json(newInvoice);
 });
 
 app.get('/analytics/summary', (req, res) => {
     const tenant_id = req.headers['x-tenant-id'];
+    const tenant_invoices = invoices.filter(i => i.tenant_id === tenant_id);
 
-    // SQL: SELECT SUM(total_amount), COUNT(*) FROM invoices WHERE tenant_id = :tenant_id
+    const total = tenant_invoices.reduce((sum, i) => sum + i.total_amount, 0);
+    const avg = tenant_invoices.length > 0 ? total / tenant_invoices.length : 0;
+
+    // Group by vendor for Top Vendor calculation
+    const vendors = {};
+    tenant_invoices.forEach(i => {
+        vendors[i.vendor_name] = (vendors[i.vendor_name] || 0) + i.total_amount;
+    });
+    const topVendor = Object.entries(vendors).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Ninguno';
+
     res.json({
-        total_expenditure: 12500.50,
-        invoice_count: 45,
-        avg_invoice_value: 277.78,
-        top_vendor: "Amazon Web Services",
+        total_expenditure: total,
+        invoice_count: tenant_invoices.length,
+        avg_invoice_value: avg,
+        top_vendor: topVendor,
+        plan: tenants[tenant_id]?.plan || 'Basic',
         trend_data: [
             { month: "Jan", total: 4000 },
             { month: "Feb", total: 3500 },
-            { month: "Mar", total: 5000 }
-        ]
+            { month: "Mar", total: total }
+        ],
+        recent_invoices: tenant_invoices.slice(0, 10)
     });
+});
+
+app.post('/erp/sync', async (req, res) => {
+    const tenant_id = req.headers['x-tenant-id'];
+    const unsynced = invoices.filter(i => i.tenant_id === tenant_id && !i.synced && i.status === 'processed');
+
+    for (const inv of unsynced) {
+        await erpConnector.syncInvoice(inv);
+        inv.synced = true;
+    }
+
+    res.json({ success: true, message: `${unsynced.length} facturas sincronizadas con el ERP.` });
 });
 
 app.listen(port, () => {
