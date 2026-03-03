@@ -1,0 +1,12 @@
+{
+  "name": "datasocio-prompt-landing",
+  "version": "1.0.0",
+  "description": "Premium landing page for SaaS AI Role Prompt",
+  "main": "index.html",
+  "scripts": {
+    "dev": "browser-sync start --server --files 'index.html, style.css, script.js' --no-notify"
+  },
+  "devDependencies": {
+    "browser-sync": "^3.0.0"
+  }
+}

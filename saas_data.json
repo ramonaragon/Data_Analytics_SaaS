@@ -1,0 +1,48 @@
+{
+    "metrics": {
+        "mrr": 45000,
+        "churn_rate": 2.4,
+        "cac": 150,
+        "ltv": 1200,
+        "active_users": 850
+    },
+    "sales_trend": [
+        {
+            "month": "Oct",
+            "revenue": 38000
+        },
+        {
+            "month": "Nov",
+            "revenue": 40500
+        },
+        {
+            "month": "Dec",
+            "revenue": 42000
+        },
+        {
+            "month": "Jan",
+            "revenue": 44500
+        },
+        {
+            "month": "Feb",
+            "revenue": 45000
+        }
+    ],
+    "top_segments": [
+        {
+            "name": "Enterprise",
+            "growth": 12.5,
+            "customers": 45
+        },
+        {
+            "name": "SME",
+            "growth": 4.2,
+            "customers": 320
+        },
+        {
+            "name": "Startup",
+            "growth": -2.1,
+            "customers": 485
+        }
+    ]
+}
